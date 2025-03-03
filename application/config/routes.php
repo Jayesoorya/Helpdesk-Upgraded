@@ -55,14 +55,10 @@ $route['translate_uri_dashes'] = FALSE;
 
 $route['login_form'] = 'Auth/login';
 $route['dashboard'] = 'dashboard';
-$route['create'] = 'dashboard/create';
+
+
+
+$route['info'] = 'dashboard/index';
 $route['details/(:num)'] = 'dashboard/details/$1';
-$route['update/(:num)'] = 'dashboard/edit/$1';
-
-$route['demo'] = 'ApiDemoController/index';
-$route['employee'] = 'ApiEmployee/index';
-$route['store'] = 'ApiEmployee/storeEmployee';
-$route['find/(:any)'] = 'ApiEmployee/findEmployee/$1';
-$route['update/(:num)'] = 'ApiEmployee/updateEmployee/$1';
-$route['delete/(:num)'] = 'ApiEmployee/deleteEmployee/$1';
-
+$route['create'] = 'dashboard/store';
+$route['update/(:num)'] = 'dashboard/update/$1';
