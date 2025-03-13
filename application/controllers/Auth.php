@@ -4,13 +4,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 require APPPATH . 'libraries/RestController.php';
 
-
 use chriskacerguis\RestServer\RestController;
 
 class Auth extends RestController {
     public function __construct() {
         parent::__construct();
         $this->load->model('User_model');
+        $this->load->library('form_validation');
+    }
+
+
+    public function loginn(){
+           $this->load->view('login_form');
     }
 
 
@@ -20,6 +25,7 @@ class Auth extends RestController {
 
         if ($this->form_validation->run() == FALSE) {
             $this->response(['status' => false, 'message' => validation_errors()], RestController::HTTP_BAD_REQUEST);
+            $this->load->view('login_form');
         } else {
             $username = $this->post('username');
             $password = $this->post('password');
@@ -32,4 +38,3 @@ class Auth extends RestController {
         }
     }
 }
-?>

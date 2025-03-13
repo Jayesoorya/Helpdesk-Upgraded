@@ -53,12 +53,22 @@ $route['default_controller'] = 'welcome';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
-$route['login_form'] = 'Auth/login';
+
+
+
+//view for all methods
+$route['login_form'] = 'auth/login';
 $route['dashboard'] = 'dashboard';
-
-
-
-$route['info'] = 'dashboard/index';
 $route['details/(:num)'] = 'dashboard/details/$1';
+$route['find'] = 'dashboard/index';
+$route['login'] = "auth/loginn";
+
+
+
+
+
+//calling method for testing
+$route['info'] = 'dashboard/index';
+$route['detail/(:num)'] = 'dashboard/details/$1';
 $route['create'] = 'dashboard/store';
 $route['update/(:num)'] = 'dashboard/update/$1';
