@@ -29,19 +29,19 @@
 </div>
 
 <!-- JavaScript for AJAX Login -->
-<!--<script>
+<script>
 document.getElementById("loginForm").addEventListener("submit", function(event) {
     event.preventDefault();
     
     let formData = new FormData(this);
     let xhr = new XMLHttpRequest();
-    xhr.open("POST", "<?php echo site_url('auth/login'); ?>", true);
+    xhr.open("POST", "auth/login", true);
     
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             let response = JSON.parse(xhr.responseText);
             if (xhr.status === 200 && response.status) {
-                window.location.href = "<?php echo site_url('dashboard'); ?>";
+                window.location.href = "dashboard";
             } else {
                 document.getElementById("errorMessage").classList.remove("d-none");
                 document.getElementById("errorMessage").innerText = response.message;
@@ -52,6 +52,5 @@ document.getElementById("loginForm").addEventListener("submit", function(event) 
     xhr.send(new URLSearchParams(formData));
 });
 </script>
--->
 </body>
 </html>

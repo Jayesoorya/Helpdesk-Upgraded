@@ -57,11 +57,12 @@ $route['translate_uri_dashes'] = FALSE;
 
 
 //view for all methods
-$route['login_form'] = 'auth/login';
+$route["loginview"] = 'helpdeskview/loginview';
+$route['login'] = 'auth/loginn';
 $route['dashboard'] = 'dashboard';
 $route['details/(:num)'] = 'dashboard/details/$1';
 $route['find'] = 'dashboard/index';
-$route['login'] = "auth/loginn";
+
 
 
 
