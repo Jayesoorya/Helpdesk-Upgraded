@@ -1,41 +1,43 @@
 <?php
-
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 require APPPATH . 'libraries/RestController.php';
-
-
 use chriskacerguis\RestServer\RestController;
 
 class Auth extends RestController {
+
     public function __construct() {
         parent::__construct();
-        $this->load->library('session'); 
-        $this->load->model('User_model');
-        $this->load->library('form_validation');
+        $this->load->library('session');
+        $this->load->model('User_model'); // Load User Model
     }
 
-
-    public function loginn(){
-        $this->load->view('login_form');
-    }
     public function login_post() {
-        $this->form_validation->set_rules('username', 'User Name', 'required');
-        $this->form_validation->set_rules('password', 'Password', 'required');
+        $username = $this->input->post('username');
+        $password = $this->input->post('password');
 
-        if ($this->form_validation->run() == FALSE) {
-            $this->response(['status' => false, 'message' => validation_errors()], RestController::HTTP_BAD_REQUEST);
-          // $this->load->view('login_form');
+        if (!$username || !$password) {
+            $this->response([
+                'status' => false,
+                'message' => 'Username and password are required'
+            ], RestController::HTTP_BAD_REQUEST);
+            return;
+        }
+
+        $user = $this->User_model->check_credentials($username, $password);
+
+        if ($user) {
+            $this->session->set_userdata('user', $user);
+            $this->response([
+                'status' => true,
+                'message' => 'Login successful',
+                'redirect' => site_url('dashboard')
+            ], RestController::HTTP_OK);
         } else {
-            $username = $this->post('username');
-            $password = $this->post('password');
-
-            if ($user = $this->User_model->check_login($username, $password)) {
-                $this->response(['status' => true, 'message' => 'Login successful'], RestController::HTTP_OK);
-               // redirect('dashboard');
-            } else {
-                $this->response(['status' => false, 'message' => 'Invalid credentials'], RestController::HTTP_UNAUTHORIZED);
-            }
+            $this->response([
+                'status' => false,
+                'message' => 'Invalid username or password'
+            ], RestController::HTTP_UNAUTHORIZED);
         }
     }
 }

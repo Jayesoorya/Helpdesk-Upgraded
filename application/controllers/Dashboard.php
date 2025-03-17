@@ -4,7 +4,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 require APPPATH . 'libraries/RestController.php';
 
-
 use chriskacerguis\RestServer\RestController;
 
 class Dashboard extends RestController {
@@ -13,31 +12,40 @@ class Dashboard extends RestController {
         $this->load->library('session');
         $this->load->model('Ticket_model');
         $this->load->library('form_validation');
+
+        // Ensure user is logged in
+        if (!$this->session->userdata('user')) {
+            redirect('auth/login');
+        }
     }
 
-    
-    public function index_get() {
+    // 🔹 Load Home Page (No API Here)
+    public function index() {
+        $tickets = $this->Ticket_model->get_all();
+        $this->load->view('home', ['tickets' => $tickets]);
+    }
+
+    // 🔹 REST API: Get Tickets (For AJAX)
+    public function getTickets_get() {
         $tickets = $this->Ticket_model->get_all();
         if ($tickets) {
-           // $this->response(['status' => true, 'tickets' => $tickets], RestController::HTTP_OK);
-            $this->load->view('home', ['tickets' =>$tickets]);
+            $this->response(['status' => true, 'tickets' => $tickets], RestController::HTTP_OK);
         } else {
             $this->response(['status' => false, 'message' => 'No tickets found'], RestController::HTTP_NOT_FOUND);
         }
     }
 
-    
+    // 🔹 REST API: Get Ticket Details
     public function details_get($id) {
         $ticket = $this->Ticket_model->get($id);
         if ($ticket) {
-           // $this->response(['status' => true, 'ticket' => $ticket], RestController::HTTP_OK);
-            $this->load->view('details',['status' => true, 'ticket' => $ticket]);
+            $this->response(['status' => true, 'ticket' => $ticket], RestController::HTTP_OK);
         } else {
             $this->response(['status' => false, 'message' => 'Ticket not found'], RestController::HTTP_NOT_FOUND);
         }
     }
 
-
+    // 🔹 REST API: Create Ticket (AJAX)
     public function store_post() {
         $this->form_validation->set_rules('Ticket', 'Ticket', 'required|min_length[5]');
         $this->form_validation->set_rules('Description', 'Description');
@@ -46,18 +54,18 @@ class Dashboard extends RestController {
         if ($this->form_validation->run() == FALSE) {
             $this->response(['status' => false, 'message' => validation_errors()], RestController::HTTP_BAD_REQUEST);
         } else {
-            $ticket = $this->input->post('Ticket');
-            $description = $this->input->post('Description');
-            $status = $this->input->post('Status');
+            $data = [
+                'Ticket' => $this->input->post('Ticket'),
+                'Description' => $this->input->post('Description'),
+                'Status' => $this->input->post('Status')
+            ];
 
-            $this->Ticket_model->insert($ticket,$description,$status);
-               
+            $this->Ticket_model->insert($data);
             $this->response(['status' => true, 'message' => 'Ticket created successfully'], RestController::HTTP_CREATED);
-            redirect('dashboard');
         }
     }
 
-    
+    // 🔹 REST API: Update Ticket (AJAX)
     public function update_post($id) {
         $this->form_validation->set_rules('Ticket', 'Ticket', 'required|min_length[5]');
         $this->form_validation->set_rules('Description', 'Description');
@@ -66,24 +74,30 @@ class Dashboard extends RestController {
         if ($this->form_validation->run() == FALSE) {
             $this->response(['status' => false, 'message' => validation_errors()], RestController::HTTP_BAD_REQUEST);
         } else {
-            $ticket = $this->input->post('Ticket');
-            $description = $this->input->post('Description');
-            $status = $this->input->post('Status');
+            $data = [
+                'Ticket' => $this->input->post('Ticket'),
+                'Description' => $this->input->post('Description'),
+                'Status' => $this->input->post('Status')
+            ];
 
-            $this->Ticket_model->update($id,$ticket,$description,$status);
+            $this->Ticket_model->update($id, $data);
             $this->response(['status' => true, 'message' => 'Ticket updated successfully'], RestController::HTTP_OK);
-            redirect('dashboard');
         }
     }
 
-
+    // 🔹 REST API: Delete Ticket (AJAX)
     public function delete_delete($id) {
         if ($this->Ticket_model->delete($id)) {
             $this->response(['status' => true, 'message' => 'Ticket deleted successfully'], RestController::HTTP_OK);
-            redirect('dashboard');
         } else {
             $this->response(['status' => false, 'message' => 'Ticket not found'], RestController::HTTP_NOT_FOUND);
         }
+    }
+
+    // 🔹 REST API: Logout
+    public function logout_post() {
+        $this->session->unset_userdata('user');
+        $this->response(['status' => true, 'message' => 'Logged out successfully'], RestController::HTTP_OK);
     }
 }
 ?>
