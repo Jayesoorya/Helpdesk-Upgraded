@@ -17,7 +17,7 @@
             <h2 class="text-center">Ticket Details</h2>
             <table class="table table-bordered">
                 <tbody id="ticketDetails">
-                    <tr><td colspan="2">Loading ticket details...</td></tr>
+                   
                 </tbody>
             </table>
             <a class="btn btn-secondary" href="<?php echo site_url('dashboard'); ?>">Back to Dashboard</a>
@@ -25,54 +25,51 @@
     </div>
 </div>
 
-<!-- ✅ JavaScript for Fetching Ticket Details -->
+<!--  JavaScript for Fetching Ticket Details -->
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const urlParams = new URLSearchParams(window.location.search);
-    const ticketId = urlParams.get("id");
+document.addEventListener("DOMContentLoaded", async function () {
+    console.log("Page Loaded"); //  Debugging - Check if script runs
 
-    if (!ticketId) {
-        document.getElementById("ticketDetails").innerHTML = "<tr><td colspan='2' class='text-danger'>Invalid Ticket ID.</td></tr>";
+    // Extract ticket ID from the URL
+    let urlParts = window.location.pathname.split("/");
+    let ticketId = urlParts[urlParts.length - 1]; // Get last part of URL
+
+    console.log("Extracted Ticket ID:", ticketId); //  Debugging - Check extracted ID
+
+    if (!ticketId || isNaN(ticketId)) {
+        document.getElementById("ticketDetails").innerHTML = `<tr><td colspan="2" class="text-center text-danger">Ticket ID is missing!</td></tr>`;
         return;
     }
 
-    function fetchTicketDetails(ticketId) {
-        let xhr = new XMLHttpRequest();
-        let apiUrl = "<?php echo site_url('dashboard/details_get/'); ?>" + ticketId;
-        
-        xhr.open("GET", apiUrl, true);
+    try {
+        let response = await fetch(`http://localhost/restapi-helpdesk/index.php/dashboard/details/${ticketId}`, {
+            method: "GET",
+            headers: { "X-API-KEY": "api123" }
+        });
 
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-                if (xhr.status === 200) {
-                    try {
-                        let data = JSON.parse(xhr.responseText);
-                        if (data.status) {
-                            let ticket = data.ticket;
-                            document.getElementById("ticketDetails").innerHTML = `
-                                <tr><th>Ticket ID:</th><td>${ticket.id}</td></tr>
-                                <tr><th>Ticket:</th><td>${ticket.Ticket}</td></tr>
-                                <tr><th>Description:</th><td>${ticket.Description}</td></tr>
-                                <tr><th>Created On:</th><td>${ticket.Created_On}</td></tr>
-                                <tr><th>Status:</th><td>${ticket.Status}</td></tr>
-                            `;
-                        } else {
-                            document.getElementById("ticketDetails").innerHTML = `<tr><td colspan='2' class='text-danger'>${data.message}</td></tr>`;
-                        }
-                    } catch (error) {
-                        console.error("JSON Parse Error:", error, xhr.responseText);
-                        document.getElementById("ticketDetails").innerHTML = `<tr><td colspan='2' class='text-danger'>Invalid API response.</td></tr>`;
-                    }
-                } else {
-                    document.getElementById("ticketDetails").innerHTML = `<tr><td colspan='2' class='text-danger'>Error loading ticket details.</td></tr>`;
-                }
-            }
-        };
+        console.log("Raw Response:", response); // Debugging - Check response object
 
-        xhr.send();
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
+
+        let result = await response.json();
+        console.log("Parsed JSON:", result); //  Debugging - Check parsed JSON
+
+        if (result.status) {
+            document.getElementById("ticketDetails").innerHTML = `
+                <tr><th>Ticket</th><td>${result.ticket.Ticket}</td></tr>
+                <tr><th>Description</th><td>${result.ticket.Description}</td></tr>
+                <tr><th>Status</th><td>${result.ticket.Status}</td></tr>
+                 <tr><th>Created On</th><td>${new Date(result.ticket.Created_On).toLocaleString()}</td></tr>
+            `;
+        } else {
+            document.getElementById("ticketDetails").innerHTML = `<tr><td colspan="2" class="text-center text-danger">Ticket not found.</td></tr>`;
+        }
+    } catch (error) {
+        console.error("Error fetching ticket details:", error);
+        document.getElementById("ticketDetails").innerHTML = `<tr><td colspan="2" class="text-center text-danger">An error occurred while loading ticket details.</td></tr>`;
     }
-
-    fetchTicketDetails(ticketId);
 });
 </script>
 

@@ -12,23 +12,16 @@ class Ticket_model extends CI_Model {
         return $this->db->get_where('tickets', ['id' => $id])->row();
     }
     
-    public function insert($ticket,$description,$status) {
-        $data = [
-                  'Ticket' => $ticket,
-                  'Description' => $description,
-                  'Status' => $status,
-    ];
+    public function insert($data) {
         return $this->db->insert('tickets', $data);
     }
     
-    public function update($id, $ticket,$description,$status) {
-        $data = [
-            'Ticket' => $ticket,
-            'Description' => $description,
-            'Status' => $status,
-];
-        return $this->db->where('id', $id)->update('tickets', $data);
+    
+    public function update($id, $data) {
+        $this->db->where('id', $id);
+        return $this->db->update('tickets', $data);
     }
+    
     
     public function delete($id) {
         return $this->db->where('id', $id)->delete('tickets');

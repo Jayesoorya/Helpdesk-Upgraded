@@ -58,10 +58,14 @@ $route['translate_uri_dashes'] = FALSE;
 
 //view for all methods
 $route["loginview"] = 'helpdeskview/loginview';
-$route['login'] = 'auth/login';
-$route['dashboard'] = 'dashboard';
-$route['details/(:num)'] = 'dashboard/details/$1';
+$route['dashboard'] = 'helpdeskview/dashboard';
+$route['details/(:num)'] = 'helpdeskview/details/$1';
 $route['find'] = 'dashboard/index';
+
+//api routes
+$route['login'] = 'auth/login';
+$route['logout'] = 'auth/logout_post';
+
 
 
 

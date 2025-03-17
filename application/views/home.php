@@ -13,7 +13,7 @@
     <div class="text-right mt-4">
         <button type="button" class="btn btn-info" data-toggle="modal" data-target="#createTicketModal">Create Ticket</button>
         <button class="btn btn-info">
-            <a class="text-white text-decoration-none" href="<?php echo site_url('auth/logout'); ?>">Logout</a>
+            <a class="text-white text-decoration-none" id="logout">Logout</a>
         </button>
     </div>
 
@@ -57,7 +57,7 @@
                     </div>
                     <div class="form-group">
                         <label for="description">Description:</label>
-                        <input class="form-control" type="text" name="description" id="description">
+                        <input class="form-control" type="text" name="Description" id="description">
                     </div>
                     <div class="form-group">
                         <label for="status">Status:</label>
@@ -121,32 +121,41 @@
 <script>
 const apiUrl = "http://localhost/restapi-helpdesk/index.php/dashboard";
 
-// 🔹 Load Tickets via AJAX
+//  Load Tickets via AJAX
 async function loadTickets() {
     try {
-        const response = await fetch(apiUrl + "/getTickets", {
+        let response = await fetch("http://localhost/restapi-helpdesk/index.php/dashboard/getTickets", {
             method: "GET",
             headers: {
-                "Content-Type": "application/json"
+                "X-API-KEY": "api123"
             }
         });
 
-        const data = await response.json();
+        console.log("Raw Response:", response); //  Debugging - Check if API is reachable
+
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
+
+        let result = await response.json();
+        console.log("Parsed JSON:", result); //  Debugging - Check if JSON is valid
+
         let ticketsHtml = "";
 
-        if (data.status) {
-            data.tickets.forEach((ticket, index) => {
+        if (result.status && result.tickets.length > 0) {
+            result.tickets.forEach((ticket, index) => {
                 ticketsHtml += `
                     <tr>
                         <td>${index + 1}</td>
                         <td>${ticket.Ticket}</td>
-                        <td><a class="btn btn-info" href="${apiUrl}/details/${ticket.id}">Details</a></td>
+                        <td><a class="btn btn-info" href="http://localhost/restapi-helpdesk/index.php/dashboard/details/${ticket.id}">Details</a></td>
                         <td>${ticket.Status}</td>
-                        <td><button class="btn btn-success update-ticket" data-id="${ticket.id}" data-toggle="modal" data-target="#updateTicketModal">Update</button></td>
+                        <td><button class="btn btn-success update-ticket" data-id="${ticket.id}">Update</button></td>
                         <td><button class="btn btn-danger delete-ticket" data-id="${ticket.id}">Delete</button></td>
                     </tr>`;
             });
         } else {
+            console.warn("No tickets found!"); //  Debugging
             ticketsHtml = `<tr><td colspan="6" class="text-center">No tickets found.</td></tr>`;
         }
 
@@ -156,37 +165,185 @@ async function loadTickets() {
     }
 }
 
-// 🔹 Create Ticket AJAX
+// Load tickets when the page loads
+document.addEventListener("DOMContentLoaded", loadTickets);
+
+//  Create Ticket AJAX
 document.getElementById("createTicketForm").addEventListener("submit", async function(event) {
-    event.preventDefault();
+    event.preventDefault(); // Stop form submission
 
     const formData = new FormData(this);
 
-    const response = await fetch(apiUrl + "/store", {
-        method: "POST",
-        body: formData
-    });
+    try {
+        const response = await fetch("http://localhost/restapi-helpdesk/index.php/dashboard/store", {
+            method: "POST",
+            headers: {
+                "X-API-KEY": "api123"
+            },
+            body: formData
+        });
 
-    const result = await response.json();
-    alert(result.message);
-    loadTickets();
-});
+        console.log("Raw Response:", response); // Debugging
 
-// 🔹 Logout AJAX
-document.getElementById("logoutBtn").addEventListener("click", async function() {
-    const response = await fetch(apiUrl + "/logout", {
-        method: "POST"
-    });
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+        }
 
-    if (response.ok) {
-        window.location.href = "<?php echo site_url('auth/login'); ?>";
-    } else {
-        alert("Logout failed!");
+        const result = await response.json();
+        console.log("Parsed JSON:", result); // Debugging
+
+        if (result.status) {
+            alert(result.message);
+            document.getElementById("createTicketForm").reset(); // Clear form
+            loadTickets(); // Refresh tickets
+        } else {
+            alert("Error: " + result.message);
+        }
+    } catch (error) {
+        console.error("Error creating ticket:", error);
+        alert("An unexpected error occurred.");
     }
 });
 
-// Load tickets on page load
-document.addEventListener("DOMContentLoaded", loadTickets);
+ // for update 
+document.addEventListener("DOMContentLoaded", function () {
+    // Open Update Modal and Fill Data
+    document.getElementById("ticketsBody").addEventListener("click", async function (event) {
+        if (event.target.classList.contains("update-ticket")) {
+            let ticketId = event.target.getAttribute("data-id");
+
+            try {
+                let response = await fetch(`http://localhost/restapi-helpdesk/index.php/dashboard/details/${ticketId}`, {
+                    method: "GET",
+                    headers: { "X-API-KEY": "api123" }
+                });
+
+                let result = await response.json();
+                console.log("Fetched Ticket for Update:", result); // Debugging
+
+                if (result.status) {
+                    document.getElementById("updateTicketId").value = ticketId;
+                    document.getElementById("updateTicket").value = result.ticket.Ticket;
+                    document.getElementById("updateDescription").value = result.ticket.Description;
+                    document.getElementById("updateStatus").value = result.ticket.Status;
+
+                    // Show Bootstrap modal
+                    let modal = new bootstrap.Modal(document.getElementById("updateTicketModal"));
+                    modal.show();
+                } else {
+                    alert("Ticket not found.");
+                }
+            } catch (error) {
+                console.error("Error fetching ticket details:", error);
+                alert("Failed to load ticket details.");
+            }
+        }
+    });
+
+    // Submit Update Form
+    document.getElementById("updateTicketForm").addEventListener("submit", async function (event) {
+        event.preventDefault(); // Prevent page reload
+
+        let ticketId = document.getElementById("updateTicketId").value;
+        let formData = new URLSearchParams();
+        formData.append("Ticket", document.getElementById("updateTicket").value);
+        formData.append("Description", document.getElementById("updateDescription").value);
+        formData.append("Status", document.getElementById("updateStatus").value);
+
+        try {
+            let response = await fetch(`http://localhost/restapi-helpdesk/index.php/dashboard/update/${ticketId}`, {
+                method: "POST",
+                headers: {
+                    "X-API-KEY": "api123",
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: formData
+            });
+
+            let result = await response.json();
+            console.log("Update Response:", result); // Debugging
+
+            if (response.ok && result.status) {
+                alert("Ticket updated successfully!");
+                let modalElement = document.getElementById("updateTicketModal");
+let modal = new bootstrap.Modal(modalElement);
+modal.hide();
+
+                loadTickets(); // Refresh ticket list
+            } else {
+                alert("Error updating ticket: " + (result.message || "Unknown error"));
+            }
+        } catch (error) {
+            console.error("Error updating ticket:", error);
+           // alert("An unexpected error occurred.");
+        }
+    });
+});
+
+//delete ticket
+document.addEventListener("DOMContentLoaded", function () {
+    // Event Listener for Delete Button
+    document.getElementById("ticketsBody").addEventListener("click", async function (event) {
+        if (event.target.classList.contains("delete-ticket")) {
+            let ticketId = event.target.getAttribute("data-id");
+
+            // Confirm before deleting
+            if (!confirm("Are you sure you want to delete this ticket?")) {
+                return;
+            }
+
+            try {
+                let response = await fetch(`http://localhost/restapi-helpdesk/index.php/dashboard/delete/${ticketId}`, {
+                    method: "DELETE",
+                    headers: {
+                        "X-API-KEY": "api123"
+                    }
+                });
+
+                let result = await response.json();
+                console.log("Delete Response:", result); // Debugging
+
+                if (response.ok && result.status) {
+                    alert("Ticket deleted successfully!");
+                    loadTickets(); // Refresh ticket list
+                } else {
+                    alert("Error deleting ticket: " + (result.message || "Unknown error"));
+                }
+            } catch (error) {
+                console.error("Error deleting ticket:", error);
+                alert("An unexpected error occurred.");
+            }
+        }
+    });
+});
+
+//  Logout AJAX
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("logout").addEventListener("click", async function () {
+        try {
+            let response = await fetch("http://localhost/restapi-helpdesk/index.php/dashboard/logout", {
+                method: "POST",
+                headers: {
+                    "X-API-KEY": "api123"
+                }
+            });
+
+            let result = await response.json();
+            console.log("Logout Response:", result); // Debugging
+
+            if (response.ok && result.status) {
+                alert("Logged out successfully!");
+                window.location.href = "http://localhost/restapi-helpdesk/index.php/auth/login"; // Redirect to login page
+            } else {
+                alert("Logout failed: " + (result.message || "Unknown error"));
+            }
+        } catch (error) {
+            console.error("Logout Error:", error);
+            alert("An unexpected error occurred.");
+        }
+    });
+});
+
 </script>
 
 </body>

@@ -28,36 +28,7 @@
  </div>
 </div>
 
-<!-- JavaScript for AJAX Login 
-
-<script>
-      document.getElementById('loginForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent form from submitting normally
-    
-    let xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://localhost/restapi-helpdesk/index.php/auth/login', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.setRequestHeader('X-API-KEY', 'api123'); // Add API key if required
-
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            let response = JSON.parse(xhr.responseText);
-            if (xhr.status === 200 && response.status === 'success') {
-                window.location.href = 'dashboard.html'; // Redirect on success
-            } else {
-                document.getElementById('errorMessage').classList.remove('d-none');
-                document.getElementById('errorMessage').textContent = response.message || 'Login failed. Please try again.';
-            }
-        }
-    };
-
-    const formData = new FormData();
-formData.append('username', document.querySelector('input[name="username"]').value);
-formData.append('password', document.querySelector('input[name="password"]').value);
-
-xhr.send(formData);
-});
-    </script> -->
+<!-- JavaScript for AJAX Login -->
 
     <script>
     document.getElementById('loginForm').addEventListener('submit', function(event) {

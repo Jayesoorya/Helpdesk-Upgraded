@@ -19,13 +19,9 @@ class Dashboard extends RestController {
         }
     }
 
-    // 🔹 Load Home Page (No API Here)
-    public function index() {
-        $tickets = $this->Ticket_model->get_all();
-        $this->load->view('home', ['tickets' => $tickets]);
-    }
 
-    // 🔹 REST API: Get Tickets (For AJAX)
+
+    //  REST API: Get Tickets (For AJAX)
     public function getTickets_get() {
         $tickets = $this->Ticket_model->get_all();
         if ($tickets) {
@@ -35,7 +31,7 @@ class Dashboard extends RestController {
         }
     }
 
-    // 🔹 REST API: Get Ticket Details
+    //  REST API: Get Ticket Details
     public function details_get($id) {
         $ticket = $this->Ticket_model->get($id);
         if ($ticket) {
@@ -45,7 +41,7 @@ class Dashboard extends RestController {
         }
     }
 
-    // 🔹 REST API: Create Ticket (AJAX)
+    //  REST API: Create Ticket (AJAX)
     public function store_post() {
         $this->form_validation->set_rules('Ticket', 'Ticket', 'required|min_length[5]');
         $this->form_validation->set_rules('Description', 'Description');
@@ -65,7 +61,7 @@ class Dashboard extends RestController {
         }
     }
 
-    // 🔹 REST API: Update Ticket (AJAX)
+    //  REST API: Update Ticket (AJAX)
     public function update_post($id) {
         $this->form_validation->set_rules('Ticket', 'Ticket', 'required|min_length[5]');
         $this->form_validation->set_rules('Description', 'Description');
@@ -85,7 +81,7 @@ class Dashboard extends RestController {
         }
     }
 
-    // 🔹 REST API: Delete Ticket (AJAX)
+    //  REST API: Delete Ticket (AJAX)
     public function delete_delete($id) {
         if ($this->Ticket_model->delete($id)) {
             $this->response(['status' => true, 'message' => 'Ticket deleted successfully'], RestController::HTTP_OK);
@@ -94,7 +90,7 @@ class Dashboard extends RestController {
         }
     }
 
-    // 🔹 REST API: Logout
+    //  REST API: Logout
     public function logout_post() {
         $this->session->unset_userdata('user');
         $this->response(['status' => true, 'message' => 'Logged out successfully'], RestController::HTTP_OK);

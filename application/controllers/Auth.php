@@ -24,7 +24,7 @@ class Auth extends RestController {
             return;
         }
 
-        $user = $this->User_model->check_credentials($username, $password);
+        $user = $this->User_model->check_login($username, $password);
 
         if ($user) {
             $this->session->set_userdata('user', $user);
