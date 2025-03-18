@@ -191,6 +191,7 @@ document.getElementById("createTicketForm").addEventListener("submit", async fun
         if (result.status) {
             alert(result.message);
             document.getElementById("createTicketForm").reset(); // Clear form
+            $('#createTicketModal').modal('hide')
             loadTickets(); // Refresh tickets
         } else {
             alert("Error: " + result.message);
@@ -224,8 +225,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("updateStatus").value = result.ticket.Status;
 
                     // Show Bootstrap modal
-                    let modal = new bootstrap.Modal(document.getElementById("updateTicketModal"));
-                    modal.show();
+                    $('#updateTicketModal').modal('show')
                 } else {
                     alert("Ticket not found.");
                 }
@@ -261,6 +261,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (response.ok && result.status) {
                 alert("Ticket updated successfully!");
+                $('#updateTicketModal').modal('hide');
 
                 loadTickets(); // Refresh ticket list
             } else {
