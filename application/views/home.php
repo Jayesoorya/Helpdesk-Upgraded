@@ -33,7 +33,7 @@
                 </tr>
             </thead>
             <tbody id="ticketsBody">
-              <!--  <tr><td colspan="6" class="text-center">Loading tickets...</td></tr> -->
+                
             </tbody>
         </table>
     </div>
@@ -124,14 +124,12 @@ const apiUrl = "http://localhost/restapi-helpdesk/index.php/dashboard";
 //  Load Tickets via AJAX
 async function loadTickets() {
     try {
-        let response = await fetch("http://localhost/restapi-helpdesk/index.php/dashboard/getTickets", {
+        let response = await fetch("http://localhost/restapi-helpdesk/getTickets", {
             method: "GET",
             headers: {
                 "X-API-KEY": "api123"
             }
         });
-
-        console.log("Raw Response:", response); //  Debugging - Check if API is reachable
 
         if (!response.ok) {
             throw new Error(`Server error: ${response.status}`);
@@ -148,7 +146,7 @@ async function loadTickets() {
                     <tr>
                         <td>${index + 1}</td>
                         <td>${ticket.Ticket}</td>
-                        <td><a class="btn btn-info" href="http://localhost/restapi-helpdesk/index.php/dashboard/details/${ticket.id}">Details</a></td>
+                        <td><a class="btn btn-info" href="http://localhost/restapi-helpdesk/details/${ticket.id}">Details</a></td>
                         <td>${ticket.Status}</td>
                         <td><button class="btn btn-success update-ticket" data-id="${ticket.id}">Update</button></td>
                         <td><button class="btn btn-danger delete-ticket" data-id="${ticket.id}">Delete</button></td>
@@ -170,20 +168,18 @@ document.addEventListener("DOMContentLoaded", loadTickets);
 
 //  Create Ticket AJAX
 document.getElementById("createTicketForm").addEventListener("submit", async function(event) {
-    event.preventDefault(); // Stop form submission
+    event.preventDefault(); 
 
     const formData = new FormData(this);
 
     try {
-        const response = await fetch("http://localhost/restapi-helpdesk/index.php/dashboard/store", {
+        const response = await fetch("http://localhost/restapi-helpdesk/create", {
             method: "POST",
             headers: {
                 "X-API-KEY": "api123"
             },
             body: formData
         });
-
-        console.log("Raw Response:", response); // Debugging
 
         if (!response.ok) {
             throw new Error(`Server error: ${response.status}`);
@@ -265,9 +261,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (response.ok && result.status) {
                 alert("Ticket updated successfully!");
-                let modalElement = document.getElementById("updateTicketModal");
-let modal = new bootstrap.Modal(modalElement);
-modal.hide();
 
                 loadTickets(); // Refresh ticket list
             } else {
@@ -275,7 +268,7 @@ modal.hide();
             }
         } catch (error) {
             console.error("Error updating ticket:", error);
-           // alert("An unexpected error occurred.");
+            alert("An unexpected error occurred.");
         }
     });
 });
@@ -333,7 +326,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (response.ok && result.status) {
                 alert("Logged out successfully!");
-                window.location.href = "http://localhost/restapi-helpdesk/index.php/auth/login"; // Redirect to login page
+                window.location.href = "http://localhost/restapi-helpdesk/loginview"; // Redirect to login page
             } else {
                 alert("Logout failed: " + (result.message || "Unknown error"));
             }
