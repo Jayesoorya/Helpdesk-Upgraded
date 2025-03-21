@@ -1,7 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+require APPPATH . 'helpers/jwt_helper.php';
 require APPPATH . 'libraries/RestController.php';
+
 use chriskacerguis\RestServer\RestController;
 
 class Auth extends RestController {
@@ -25,6 +27,17 @@ class Auth extends RestController {
         }
 
         $user = $this->User_model->check_login($username, $password);
+
+        // generate token
+         $jwt = new JWT();
+
+        $SecretKey = 'leo_key';
+        $data = array(
+            'user_id' => 1,
+            'username' => 'Soorya',
+        );
+
+        $token = $jwt->encode($data, $SecretKey, 'HS256');
 
         if ($user) {
             $this->session->set_userdata('user', $user);

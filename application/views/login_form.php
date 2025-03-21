@@ -59,7 +59,8 @@
     .then(data => {
         console.log("Response:", data);
         if (data.status) {
-            window.location.href = "dashboard"; // Redirect on success
+            localStorage.setItem("token", data.token);
+            window.location.href = "dashboard";
         } else {
             alert("Login failed: " + data.message);
         }
