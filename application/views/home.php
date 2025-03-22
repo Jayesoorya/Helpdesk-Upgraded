@@ -123,10 +123,19 @@ const apiUrl = "http://localhost/restapi-helpdesk/index.php/dashboard";
 
 //  Load Tickets via AJAX
 async function loadTickets() {
+    
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("Authentication required. Please log in.");
+        return;
+    }
+
     try {
         let response = await fetch("http://localhost/restapi-helpdesk/getTickets", {
             method: "GET",
             headers: {
+                //pass user token in the header
+                "Authorization": "Bearer " + token,
                 "X-API-KEY": "api123"
             }
         });
@@ -136,7 +145,7 @@ async function loadTickets() {
         }
 
         let result = await response.json();
-        console.log("Parsed JSON:", result); //  Debugging - Check if JSON is valid
+        //console.log("Parsed JSON:", result); //  Debugging - Check if JSON is valid
 
         let ticketsHtml = "";
 
@@ -178,7 +187,7 @@ document.getElementById("createTicketForm").addEventListener("submit", async fun
     }
 
     const formData = new FormData(this);
-
+    
     try {
         const response = await fetch("http://localhost/restapi-helpdesk/create", {
             method: "POST",
@@ -195,7 +204,7 @@ document.getElementById("createTicketForm").addEventListener("submit", async fun
         }
 
         const result = await response.json();
-        console.log("Parsed JSON:", result); // Debugging
+      //  console.log("Parsed JSON:", result); // Debugging
 
         if (result.status) {
             alert(result.message);
@@ -212,20 +221,34 @@ document.getElementById("createTicketForm").addEventListener("submit", async fun
 });
 
  // for update 
-document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function () {
     // Open Update Modal and Fill Data
     document.getElementById("ticketsBody").addEventListener("click", async function (event) {
+
+        // get token from localStorage
+    const token = localStorage.getItem("token");
+   
+    if (!token) {
+        alert("Authentication required. Please log in.");
+        return;
+    }
+
         if (event.target.classList.contains("update-ticket")) {
             let ticketId = event.target.getAttribute("data-id");
 
             try {
                 let response = await fetch(`http://localhost/restapi-helpdesk/index.php/dashboard/details/${ticketId}`, {
                     method: "GET",
-                    headers: { "X-API-KEY": "api123" }
+                    headers: {
+                        //pass user token in the header
+                        "Authorization": "Bearer " + token,
+                        "X-API-KEY": "api123" 
+                        
+                    }
                 });
 
                 let result = await response.json();
-                console.log("Fetched Ticket for Update:", result); // Debugging
+                //console.log("Fetched Ticket for Update:", result); // Debugging
 
                 if (result.status) {
                     document.getElementById("updateTicketId").value = ticketId;
@@ -249,6 +272,14 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("updateTicketForm").addEventListener("submit", async function (event) {
         event.preventDefault(); // Prevent page reload
 
+            // get token from localStorage
+        const token = localStorage.getItem("token");
+   
+        if (!token) {
+            alert("Authentication required. Please log in.");
+            return;
+        }
+
         let ticketId = document.getElementById("updateTicketId").value;
         let formData = new URLSearchParams();
         formData.append("Ticket", document.getElementById("updateTicket").value);
@@ -259,14 +290,16 @@ document.addEventListener("DOMContentLoaded", function () {
             let response = await fetch(`http://localhost/restapi-helpdesk/index.php/dashboard/update/${ticketId}`, {
                 method: "POST",
                 headers: {
-                    "X-API-KEY": "api123",
-                    "Content-Type": "application/x-www-form-urlencoded"
+                        //pass user token in the header
+                        "Authorization": "Bearer " + token,
+                        "X-API-KEY": "api123",
+                        "Content-Type": "application/x-www-form-urlencoded"
                 },
                 body: formData
             });
 
             let result = await response.json();
-            console.log("Update Response:", result); // Debugging
+           // console.log("Update Response:", result); // Debugging
 
             if (response.ok && result.status) {
                 alert("Ticket updated successfully!");
@@ -285,9 +318,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
 //delete ticket
 document.addEventListener("DOMContentLoaded", function () {
-    // Event Listener for Delete Button
-    document.getElementById("ticketsBody").addEventListener("click", async function (event) {
+
+        // get token from localStorage
+        const token = localStorage.getItem("token");
+   
+        if (!token) {
+            alert("Authentication required. Please log in.");
+            return;
+        }
+        // Event Listener for Delete Button
+        document.getElementById("ticketsBody").addEventListener("click", async function (event) {
+
         if (event.target.classList.contains("delete-ticket")) {
+            
             let ticketId = event.target.getAttribute("data-id");
 
             // Confirm before deleting
@@ -299,6 +342,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 let response = await fetch(`http://localhost/restapi-helpdesk/index.php/dashboard/delete/${ticketId}`, {
                     method: "DELETE",
                     headers: {
+                        //pass user token in the header
+                        "Authorization": "Bearer " + token,
                         "X-API-KEY": "api123"
                     }
                 });

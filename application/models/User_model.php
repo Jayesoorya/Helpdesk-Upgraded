@@ -7,13 +7,13 @@ class User_model extends CI_Model {
     }
 
     public function get_userdetails($username){
-        $query = $this->db->get_where('log', ['username'=>$username]);
+        $query = $this->db->get_where('log', ['username' => $username]);
         return $query->row();
     }
 
-    public function check_id_password($id, $username){
-        $query = $this->db->get_where('log', ['user_id'=>$id, 'username'=>$username]);
-        return $query->num_row() >0;
+    public function check_id_username($user_id, $username){
+        $query = $this->db->get_where('log', ['id' => $user_id, 'username' => $username]);
+        return $query->num_rows() > 0;
     }
     
 }

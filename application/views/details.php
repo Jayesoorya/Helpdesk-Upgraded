@@ -28,7 +28,13 @@
 <!--  JavaScript for Fetching Ticket Details -->
 <script>
 document.addEventListener("DOMContentLoaded", async function () {
-    console.log("Page Loaded"); //  Debugging - Check if script runs
+   
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("Authentication required. Please log in.");
+        return;
+    }
+
 
     // Extract ticket ID from the URL
     let urlParts = window.location.pathname.split("/");
@@ -44,7 +50,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     try {
         let response = await fetch(`http://localhost/restapi-helpdesk/index.php/dashboard/details/${ticketId}`, {
             method: "GET",
-            headers: { "X-API-KEY": "api123" }
+            headers: { 
+                //pass user token in the header
+                "Authorization": "Bearer " + token,
+                "X-API-KEY": "api123" }
         });
 
         console.log("Raw Response:", response); // Debugging - Check response object
