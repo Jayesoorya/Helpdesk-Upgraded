@@ -28,21 +28,24 @@ class Auth extends RestController {
 
         $user = $this->User_model->check_login($username, $password);
 
-        // generate token
-         $jwt = new JWT();
-
-        $SecretKey = 'leo_key';
-        $data = array(
-            'user_id' => 1,
-            'username' => 'Soorya',
-        );
-
-        $token = $jwt->encode($data, $SecretKey, 'HS256');
-
         if ($user) {
+            // get user details
+            $user_details = $this->User_model->get_userdetails($username);
+            
+            // generate token
+            $jwt = new JWT();
+            $SecretKey = 'leo_key';
+            $data = array(
+                'user_id' => $user_details->id,
+                'username' => $user_details->username
+            );
+ 
+            $token = $jwt->encode($data, $SecretKey, 'HS256');
+ 
             $this->session->set_userdata('user', $user);
             $this->response([
                 'status' => true,
+                'token' => $token,
                 'message' => 'Login successful',
                 'redirect' => site_url('dashboard')
             ], RestController::HTTP_OK);

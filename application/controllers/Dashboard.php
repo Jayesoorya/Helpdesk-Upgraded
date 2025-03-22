@@ -2,6 +2,8 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+require APPPATH . 'helpers/jwt_helper.php';
+
 require APPPATH . 'libraries/RestController.php';
 
 use chriskacerguis\RestServer\RestController;
@@ -43,6 +45,36 @@ class Dashboard extends RestController {
 
     //   Create Ticket (AJAX)
     public function store_post() {
+        //get the token from the headers
+        $token = $this->input->get_request_header('Authorization');
+
+       // $token = str_replace('Bearer ', '', $token);
+
+        //decode the jwt token
+        try{
+        $jwt = new JWT();
+        $SecretKey = 'leo_key';
+        $decoded =  $jwt->decode($token, $Secretkey, 'HS256');
+
+        if (!$decoded) {
+            throw new Exception("Invalid token");
+        }
+
+        $id = $decoded->user_id;
+        $username = $decoded->username;
+
+        // validate the jwt token
+        $user = $this->User_model->check_id_password($id,$username);
+
+        if (!$user) {
+            $this->response(['status' => false, 'message' => 'User validation failed'], RestController::HTTP_UNAUTHORIZED);
+            return;
+        }
+    }catch(Exception $e) {
+        $this->response(['status' => false, 'message' => 'Invalid token: ' . $e->getMessage()], RestController::HTTP_UNAUTHORIZED);
+        return;
+    }
+    
         $this->form_validation->set_rules('Ticket', 'Ticket', 'required|min_length[5]');
         $this->form_validation->set_rules('Description', 'Description');
         $this->form_validation->set_rules('Status', 'Status', 'required');

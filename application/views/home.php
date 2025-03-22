@@ -170,12 +170,21 @@ document.addEventListener("DOMContentLoaded", loadTickets);
 document.getElementById("createTicketForm").addEventListener("submit", async function(event) {
     event.preventDefault(); 
 
+    // get token from localStorage
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("Authentication required. Please log in.");
+        return;
+    }
+
     const formData = new FormData(this);
 
     try {
         const response = await fetch("http://localhost/restapi-helpdesk/create", {
             method: "POST",
-            headers: {
+            headers: { 
+                //pass user token in the header
+                "Authorization": "Bearer " + token,
                 "X-API-KEY": "api123"
             },
             body: formData
