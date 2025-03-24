@@ -26,13 +26,39 @@ class Dashboard extends RestController {
 
     //   Get Tickets (For AJAX)
     public function getTickets_get() {
-        $tickets = $this->Ticket_model->get_all();
-        if ($tickets) {
-            $this->response(['status' => true, 'tickets' => $tickets], RestController::HTTP_OK);
-        } else {
-            $this->response(['status' => false, 'message' => 'No tickets found'], RestController::HTTP_NOT_FOUND);
+         //get the token from the headers
+
+         $token = $this->input->get_request_header('Authorization');
+        
+         $token = str_replace('Bearer ', '', $token);
+ 
+         //decode the jwt token
+         try {
+             $jwt = new JWT();
+             $SecretKey = 'leo_key';
+             $decoded =  $jwt->decode($token, $SecretKey, 'HS256');
+ 
+             $user_id = $decoded->user_id;
+             $username = $decoded->username;
+ 
+             // validate the jwt token
+             $user = $this->User_model->check_id_username($user_id, $username);
+     
+             if($user){
+                $tickets = $this->Ticket_model->get_all();
+                if ($tickets) {
+                    $this->response(['status' => true, 'tickets' => $tickets], RestController::HTTP_OK);
+                } else {
+                    $this->response(['status' => false, 'message' => 'No tickets found'], RestController::HTTP_NOT_FOUND);
+                }
+             }else{
+                $this->response(['status' => false, 'message' => 'User Validation failed'], RestController::HTTP_NOT_FOUND);
+                    }
+        } catch(Exception $e) {
+            $this->response(['status' => false, 'message' => 'Invalid token: ' . $e->getMessage()], RestController::HTTP_UNAUTHORIZED);
+            return;
         }
-    }
+}
 
     //   Get Ticket Details
     public function details_get($id) {
@@ -54,19 +80,22 @@ class Dashboard extends RestController {
              // validate the jwt token
              $user = $this->User_model->check_id_username($user_id, $username);
      
-        if ($user) {
-            $ticket = $this->Ticket_model->get($id);
-        if ($ticket) {
-            $this->response(['status' => true, 'ticket' => $ticket], RestController::HTTP_OK);
-        } 
-    }else {
-            $this->response(['status' => false, 'message' => 'Ticket not found'], RestController::HTTP_NOT_FOUND);
+             if($user){
+                $ticket = $this->Ticket_model->get($id);
+                if ($ticket) {
+                    $this->response(['status' => true, 'ticket' => $ticket], RestController::HTTP_OK);
+                }
+                else{
+                    $this->response(['status' => false, 'message' => 'Ticket not found'], RestController::HTTP_NOT_FOUND);
+                }
+             }
+             else{
+                $this->response(['status' => false, 'message' => 'User Validation failed'], RestController::HTTP_NOT_FOUND);
+             }
+        } catch(Exception $e) {
+            $this->response(['status' => false, 'message' => 'Invalid token: ' . $e->getMessage()], RestController::HTTP_UNAUTHORIZED);
+            return;
         }
-        
-    } catch(Exception $e) {
-        $this->response(['status' => false, 'message' => 'Invalid token: ' . $e->getMessage()], RestController::HTTP_UNAUTHORIZED);
-        return;
-    }
     }
 
     //   Create Ticket (AJAX)
@@ -158,15 +187,15 @@ class Dashboard extends RestController {
                     $this->response(['status' => true, 'message' => 'Ticket updated successfully'], RestController::HTTP_OK);
                 }
             }
-                else{
-                    $this->response(['status' => false, 'message' => 'User validation failed'], RestController::HTTP_UNAUTHORIZED);
-                    return;
-                }
-    
-            } catch(Exception $e) {
-                $this->response(['status' => false, 'message' => 'Invalid token: ' . $e->getMessage()], RestController::HTTP_UNAUTHORIZED);
+            else{
+                $this->response(['status' => false, 'message' => 'User validation failed'], RestController::HTTP_UNAUTHORIZED);
                 return;
             }
+    
+        } catch(Exception $e) {
+            $this->response(['status' => false, 'message' => 'Invalid token: ' . $e->getMessage()], RestController::HTTP_UNAUTHORIZED);
+            return;
+        }
     }
 
 
@@ -191,17 +220,20 @@ class Dashboard extends RestController {
              $user = $this->User_model->check_id_username($user_id, $username);
 
             if ($user) {
-            if ($this->Ticket_model->delete($id)) {
-                $this->response(['status' => true, 'message' => 'Ticket deleted successfully'], RestController::HTTP_OK);
-            } 
-        } else {
+                if ($this->Ticket_model->delete($id)) {
+                    $this->response(['status' => true, 'message' => 'Ticket deleted successfully'], RestController::HTTP_OK);
+                } 
+                else{
+                    $this->response(['status' => false, 'message' => 'Ticket not deleted'], RestController::HTTP_BAD_REQUEST);
+                }
+            } else {
                 $this->response(['status' => false, 'message' => 'Ticket not found'], RestController::HTTP_NOT_FOUND);
             }
-            } catch(Exception $e) {
-                $this->response(['status' => false, 'message' => 'Invalid token: ' . $e->getMessage()], RestController::HTTP_UNAUTHORIZED);
-                return;
-            }
-    }
+        } catch(Exception $e) {
+            $this->response(['status' => false, 'message' => 'Invalid token: ' . $e->getMessage()], RestController::HTTP_UNAUTHORIZED);
+            return;
+        }
+}
     
 
     //   Logout
