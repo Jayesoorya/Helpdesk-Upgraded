@@ -12,7 +12,10 @@ class helpdeskview extends CI_Controller {
     }
 
     public function loginview(){
+        $header_data['title'] = 'Login';
+        $this->load->view('header', $header_data);
         $this->load->view('login_form');
+        $this->load->view('footer');
     }
 
     public function dashboard() {

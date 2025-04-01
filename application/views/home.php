@@ -179,7 +179,7 @@
                             headers: {
                                 "Authorization": `Bearer ${token}`,
                                 "X-API-KEY": "api123",
-                                "Content-Type": "multipart/form-data"
+                                "Content-Type": "application/x-www-form-urlencoded"
                             }
                         })
                         .then(response => {
