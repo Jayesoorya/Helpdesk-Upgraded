@@ -24,7 +24,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 //$config['base_url'] = 'http://localhost/codeigniter3/';
-$config['base_url'] = 'http://localhost/restapi-helpdesk/';
+$config['base_url'] = 'http://localhost/Helpdesk_vue.js/';
 
 
 

@@ -1,83 +1,91 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ticket Details</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js"></script>
 </head>
 <body>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-
-<div class="container mt-5">
+<div id="app" class="container mt-5">
     <div class="card">
         <div class="card-body">
             <h2 class="text-center">Ticket Details</h2>
+            
             <table class="table table-bordered">
-                <tbody id="ticketDetails">
-                   
+                <tbody v-if="ticket">
+                    <tr><th>Ticket</th><td>{{ ticket.Ticket }}</td></tr>
+                    <tr><th>Description</th><td>{{ ticket.Description }}</td></tr>
+                    <tr><th>Status</th><td>{{ ticket.Status }}</td></tr>
+                    <tr><th>Created On</th><td>{{ ticket.Created_On }}</td></tr>
+                </tbody>
+                <tbody v-else>
+                    <tr><td colspan="2" class="text-center text-danger">Loading ticket details...</td></tr>
                 </tbody>
             </table>
-            <a class="btn btn-secondary" href="<?php echo site_url('dashboard'); ?>">Back to Dashboard</a>
+
+            <a class="btn btn-secondary" href="http://localhost/Helpdesk_vue.js/dashboard">Back to Dashboard</a>
         </div>
     </div>
 </div>
 
-<!--  JavaScript for Fetching Ticket Details -->
+<!-- Vue.js and axios  -->
 <script>
-document.addEventListener("DOMContentLoaded", async function () {
-   
-    const token = localStorage.getItem("token");
-    if (!token) {
-        alert("Authentication required. Please log in.");
-        return;
-    }
+new Vue({
+    el: "#app",
+    data() {
+        return {
+            ticket: null, // stores details
+            ticketId: null
+        };
+    },
+    created() {
+        this.getTicketIdFromURL();
+        this.fetchTicketDetails();
+    },
+    methods: {
+        // extract ID from URL
+        getTicketIdFromURL() {
+            let urlParts = window.location.pathname.split("/");
+            this.ticketId = urlParts[urlParts.length - 1]; // get last part of URL
+            console.log("Extracted Ticket ID:", this.ticketId);
+        },
 
+        // Fetch Ticket Details using Axios
+        fetchTicketDetails() {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("Authentication required. Please log in.");
+                return;
+            }
 
-    // Extract ticket ID from the URL
-    let urlParts = window.location.pathname.split("/");
-    let ticketId = urlParts[urlParts.length - 1]; // Get last part of URL
+            if (!this.ticketId || isNaN(this.ticketId)) {
+                alert("Invalid Ticket ID!");
+                return;
+            }
 
-    console.log("Extracted Ticket ID:", ticketId); //  Debugging - Check extracted ID
-
-    if (!ticketId || isNaN(ticketId)) {
-        document.getElementById("ticketDetails").innerHTML = `<tr><td colspan="2" class="text-center text-danger">Ticket ID is missing!</td></tr>`;
-        return;
-    }
-
-    try {
-        let response = await fetch(`http://localhost/restapi-helpdesk/index.php/dashboard/details/${ticketId}`, {
-            method: "GET",
-            headers: { 
-                //pass user token in the header
-                "Authorization": "Bearer " + token,
-                "X-API-KEY": "api123" }
-        });
-
-        console.log("Raw Response:", response); // Debugging - Check response object
-
-        if (!response.ok) {
-            throw new Error(`Server error: ${response.status}`);
-        }
-
-        let result = await response.json();
-        console.log("Parsed JSON:", result); //  Debugging - Check parsed JSON
-
-        if (result.status) {
-            document.getElementById("ticketDetails").innerHTML = `
-                <tr><th>Ticket</th><td>${result.ticket.Ticket}</td></tr>
-                <tr><th>Description</th><td>${result.ticket.Description}</td></tr>
-                <tr><th>Status</th><td>${result.ticket.Status}</td></tr>
-                 <tr><th>Created On</th><td>${new Date(result.ticket.Created_On).toLocaleString()}</td></tr>
-            `;
-        } else {
-            document.getElementById("ticketDetails").innerHTML = `<tr><td colspan="2" class="text-center text-danger">Ticket not found.</td></tr>`;
-        }
-    } catch (error) {
-        console.error("Error fetching ticket details:", error);
-        document.getElementById("ticketDetails").innerHTML = `<tr><td colspan="2" class="text-center text-danger">An error occurred while loading ticket details.</td></tr>`;
+            axios.get(`http://localhost/Helpdesk_vue.js/index.php/dashboard/details/${this.ticketId}`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "X-API-KEY": "api123"
+                }
+            })
+            .then(response => {
+                console.log("API Response:", response.data);
+                if (response.data.status) {
+                    this.ticket = response.data.ticket; // get ticket details
+                } else {
+                    alert("Ticket not found.");
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching ticket:", error);
+                alert("An error occurred while loading the ticket details.");
+            });
+        },
     }
 });
 </script>
