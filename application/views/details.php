@@ -1,4 +1,3 @@
-<body>
 <div id="app" class="container mt-5">
     <div class="card">
         <div class="card-body">
@@ -21,4 +20,4 @@
     </div>
 </div>
 
-<script src="assets/js/app/details.js"></script>
+<script src="../assets/js/app/details.js"></script>

@@ -31,7 +31,7 @@ new Vue({
                 return;
             }
 
-            axios.get("http://localhost/Helpdesk_vue.js/index.php/dashboard/details/" + this.ticketId, {
+            axios.get("http://localhost/Helpdesk_vue.js/detail/" + this.ticketId, {
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "X-API-KEY": "api123"   
