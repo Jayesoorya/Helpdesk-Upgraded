@@ -19,10 +19,17 @@ class helpdeskview extends CI_Controller {
     }
 
     public function dashboard() {
-      //  $tickets = $this->Ticket_model->get_all();
+        $header_data['title'] = 'Home';
+        $this->load->view('header', $header_data);
         $this->load->view('home');
+        $this->load->view('footer');
+
     }
     public function details($id){
+        $header_data['title'] = 'Details Page';
+        $this->load->view('header', $header_data);
         $this->load->view('details');
+        $this->load->view('footer');
+
     }
 }

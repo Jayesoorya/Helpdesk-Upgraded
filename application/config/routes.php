@@ -67,9 +67,5 @@ $route['logout'] = 'auth/logout_post';
 $route['create'] = 'dashboard/store';
 $route['getTickets'] = 'dashboard/getTickets';
 
-
-
-//calling method for testing
-
 $route['detail/(:num)'] = 'dashboard/details/$1';
 $route['update/(:num)'] = 'dashboard/update/$1';
