@@ -8,6 +8,10 @@ class Ticket_model extends CI_Model {
         return $query->result();
     }
     
+    public function get_by_user($user_id) {
+        return $this->db->get_where('tickets', ['user_id' => $user_id])->result();
+    }
+    
     public function get($id) {
         return $this->db->get_where('tickets', ['id' => $id])->row();
     }

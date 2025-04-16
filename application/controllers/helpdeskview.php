@@ -32,4 +32,18 @@ class helpdeskview extends CI_Controller {
         $this->load->view('footer');
 
     }
+
+    public function sign_up(){
+        $header_data['title'] = 'Register';
+        $this->load->view('header', $header_data);
+        $this->load->view('sign_up');
+        $this->load->view('footer');
+    }
+
+    public function profile(){
+        $header_data['title'] = 'Profile';
+        $this->load->view('header', $header_data);
+        $this->load->view('profile_page');
+        $this->load->view('footer');
+    }
 }

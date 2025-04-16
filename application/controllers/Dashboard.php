@@ -39,13 +39,13 @@ class Dashboard extends RestController {
              $decoded =  $jwt->decode($token, $SecretKey, 'HS256');
  
              $user_id = $decoded->user_id;
-             $username = $decoded->username;
+             $email = $decoded->email;
  
              // validate the jwt token
-             $user = $this->User_model->check_id_username($user_id, $username);
+             $user = $this->User_model->check_id_email($user_id, $email);
      
              if($user){
-                $tickets = $this->Ticket_model->get_all();
+                $tickets = $this->Ticket_model->get_by_user($user_id);
                 if ($tickets) {
                     $this->response(['status' => true, 'tickets' => $tickets], RestController::HTTP_OK);
                 } else {
@@ -75,10 +75,10 @@ class Dashboard extends RestController {
              $decoded =  $jwt->decode($token, $SecretKey, 'HS256');
  
              $user_id = $decoded->user_id;
-             $username = $decoded->username;
+             $email = $decoded->email;
  
              // validate the jwt token
-             $user = $this->User_model->check_id_username($user_id, $username);
+             $user = $this->User_model->check_id_email($user_id, $email);
      
              if($user){
                 $ticket = $this->Ticket_model->get($id);
@@ -113,10 +113,10 @@ class Dashboard extends RestController {
             $decoded =  $jwt->decode($token, $SecretKey, 'HS256');
 
             $user_id = $decoded->user_id;
-            $username = $decoded->username;
+            $email = $decoded->email;
 
             // validate the jwt token
-            $user = $this->User_model->check_id_username($user_id, $username);
+            $user = $this->User_model->check_id_email($user_id, $email);
     
             if ($user) {
                 $this->form_validation->set_rules('Ticket', 'Ticket', 'required|min_length[5]');
@@ -129,7 +129,8 @@ class Dashboard extends RestController {
                     $data = [
                         'Ticket' => $this->input->post('Ticket'),
                         'Description' => $this->input->post('Description'),
-                        'Status' => $this->input->post('Status')
+                        'Status' => $this->input->post('Status'),
+                        'user_id' => $user_id
                     ];
         
                     $this->Ticket_model->insert($data);
@@ -164,23 +165,23 @@ class Dashboard extends RestController {
              $decoded =  $jwt->decode($token, $SecretKey, 'HS256');
  
              $user_id = $decoded->user_id;
-             $username = $decoded->username;
+             $email = $decoded->email;
  
              // validate the jwt token
-             $user = $this->User_model->check_id_username($user_id, $username);
+             $user = $this->User_model->check_id_email($user_id, $email);
 
              if ($user) {
-                $this->form_validation->set_rules('Ticket', 'Ticket', 'required|min_length[5]');
-                $this->form_validation->set_rules('Description', 'Description');
-                $this->form_validation->set_rules('Status', 'Status', 'required|in_list[Open,In Progress,Closed]');
+                $this->form_validation->set_rules('ticket', 'Ticket', 'required|min_length[5]');
+                $this->form_validation->set_rules('description', 'Description');
+                $this->form_validation->set_rules('status', 'Status', 'required|in_list[Open,In Progress,Closed]');
 
                 if ($this->form_validation->run() == FALSE) {
                     $this->response(['status' => false, 'message' => validation_errors()], RestController::HTTP_BAD_REQUEST);
                 } else {
                     $data = [
-                        'Ticket' => $this->input->post('Ticket'),
-                        'Description' => $this->input->post('Description'),
-                        'Status' => $this->input->post('Status')
+                        'Ticket' => $this->input->post('ticket'),
+                        'Description' => $this->input->post('description'),
+                        'Status' => $this->input->post('status')
                     ];
 
                     $this->Ticket_model->update($id, $data);
@@ -241,5 +242,60 @@ class Dashboard extends RestController {
         $this->session->unset_userdata('user');
         $this->response(['status' => true, 'message' => 'Logged out successfully'], RestController::HTTP_OK);
     }
+
+    //  get profile
+    public function get_profile_post() {
+        $token = $this->input->get_request_header('Authorization');
+        $token = str_replace('Bearer ', '', $token);
+    
+        try {
+            $jwt = new JWT();
+            $SecretKey = 'leo_key';
+            $decoded = $jwt->decode($token, $SecretKey, 'HS256');
+
+            $user_id = $decoded->user_id;
+    
+            $user = $this->User_model->get_user_by_id($user_id);
+    
+            if ($user) {
+                $this->response(['status' => true, 'user' => $user], RestController::HTTP_OK);
+            } else {
+                $this->response(['status' => false, 'message' => 'User not found'], RestController::HTTP_NOT_FOUND);
+            }
+    
+        } catch (Exception $e) {
+            $this->response(['status' => false, 'message' => 'Invalid token'], RestController::HTTP_UNAUTHORIZED);
+        }
+    }
+    
+    // to change password
+    public function change_password_post() {
+        $token = $this->input->get_request_header('Authorization');
+        $token = str_replace('Bearer ', '', $token);
+    
+        try {
+            $jwt = new JWT();
+            $SecretKey = 'leo_key';
+            $decoded = $jwt->decode($token, $SecretKey, 'HS256');
+            
+            $user_id = $decoded->user_id;
+    
+            $current = $this->input->post('current_password');
+            $new = $this->input->post('new_password');
+    
+            $user = $this->User_model->get_user_by_id($user_id);
+    
+            if ($user && password_verify($current, $user->password)) {
+                $this->User_model->update_password($user_id, password_hash($new, PASSWORD_DEFAULT));
+                $this->response(['status' => true, 'message' => 'Password updated successfully'], RestController::HTTP_OK);
+            } else {
+                $this->response(['status' => false, 'message' => 'Incorrect current password'], RestController::HTTP_UNAUTHORIZED);
+            }
+    
+        } catch (Exception $e) {
+            $this->response(['status' => false, 'message' => 'Invalid token'], RestController::HTTP_UNAUTHORIZED);
+        }
+    }
+    
 }
 ?>

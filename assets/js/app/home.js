@@ -11,18 +11,23 @@ new Vue({
         this.loadTickets();
     },
     methods: {
+        goToProfile() {
+            window.location.href = "profileview"; // Adjust if your route/view is named differently
+        },
+
         loadTickets() {
             const token = localStorage.getItem("token");
             if (!token) {
                 alert("Authentication required. Please log in.");
                 return;
             }
-            axios.get("http://localhost/Helpdesk_vue.js/getTickets", {
+            axios.get("http://localhost/Helpdesk-Upgraded/getTickets", {
                 headers: {
                     "Authorization": `Bearer ${token}`,
-                    "X-API-KEY": "api123",
+                    //"X-API-KEY": "api123",
                 }
             })
+        
             .then(response => {
                 if (response.data.status && response.data.tickets) {
                     this.tickets = response.data.tickets;
@@ -47,7 +52,7 @@ new Vue({
                 formData.append("Description", this.newTicket.Description);
                 formData.append("Status", this.newTicket.Status);
 
-                axios.post("http://localhost/Helpdesk_vue.js/create", formData, {
+                axios.post("http://localhost/Helpdesk-Upgraded/create", formData, {
                     headers: {
                         "Authorization": `Bearer ${token}`,
                         "X-API-KEY": "api123",
@@ -82,10 +87,10 @@ new Vue({
                 return;
             }
 
-            axios.post(`http://localhost/Helpdesk_vue.js/update/${this.updateTicketData.id}`, this.updateTicketData, {
+            axios.post(`http://localhost/Helpdesk-Upgraded/update/${this.updateTicketData.id}`, this.updateTicketData, {
                 headers: {
                     "Authorization": `Bearer ${token}`,
-                    "X-API-KEY": "api123",
+                    //"X-API-KEY": "api123",
                     "Content-Type": "application/x-www-form-urlencoded"
                 }
             })
@@ -115,7 +120,7 @@ new Vue({
                 return;
             }
 
-            axios.delete(`http://localhost/Helpdesk_vue.js/index.php/dashboard/delete/${ticketId}`, {
+            axios.delete(`http://localhost/Helpdesk-Upgraded/index.php/dashboard/delete/${ticketId}`, {
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "X-API-KEY": "api123"
@@ -136,9 +141,9 @@ new Vue({
         },
         
         logout() {
-            axios.post("http://localhost/Helpdesk_vue.js/index.php/dashboard/logout", {}, {
+            axios.post("http://localhost/Helpdesk-Upgraded/index.php/dashboard/logout", {}, {
                 headers: {
-                    "X-API-KEY": "api123"
+                    //"X-API-KEY": "api123"
                 }
             })
             .then(response => {
@@ -147,7 +152,7 @@ new Vue({
                 if (response.data.status) {
                     alert("Logged out successfully!");
                     localStorage.removeItem("token"); // Remove token
-                    window.location.href = "http://localhost/Helpdesk_vue.js/loginview"; // Redirect to login page
+                    window.location.href = "http://localhost/Helpdesk-Upgraded/loginview"; // Redirect to login page
                 } else {
                     alert("Logout failed: " + (response.data.message || "Unknown error"));
                 }

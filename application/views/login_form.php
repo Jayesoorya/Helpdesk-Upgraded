@@ -7,16 +7,22 @@
             <div class="card-body">
             <!-- <form > -->
                 <h2 >Login</h2>
-                   <label >User Name</label>
-                   <input class="form-control" v-model="username" placeholder="Username" required>
+                   <label >Email</label>
+                   <input class="form-control" v-model="email" placeholder="Enter Email" required>
                    <label >Password</label>
-                <input class="form-control" type="password" v-model="password" placeholder="Password" required >
+                <input class="form-control" type="password" v-model="password" placeholder="Enter Password" required >
                 <button class="btn btn-info mt-4" type="submit" @click="login" >Login</button>
             <!-- </form> -->
+
+            <p class="mt-3 text-center">
+                Don't have an account?
+                <a href="http://localhost/Helpdesk-Upgraded/register">Sign up here</a>
+            </p>
         </div>
      </div>
  </div>
 </div>
+
 
 <!-- Vue.JS for AJAX Login -->
 

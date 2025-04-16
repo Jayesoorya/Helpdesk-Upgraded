@@ -56,6 +56,8 @@ $route['translate_uri_dashes'] = FALSE;
 
 //view for all methods
 $route["loginview"] = 'helpdeskview/loginview';
+$route["register"] = 'helpdeskview/sign_up';
+$route['profileview'] = 'helpdeskview/profile';
 $route['dashboard'] = 'helpdeskview/dashboard';
 $route['details/(:num)'] = 'helpdeskview/details/$1';
 $route['find'] = 'dashboard/index';
@@ -63,6 +65,9 @@ $route['find'] = 'dashboard/index';
 
 //api routes
 $route['login'] = 'auth/login';
+$route['sign_up'] = 'auth/register_user';
+$route['get_profile'] = 'dashboard/get_profile';
+$route['change'] = 'dashboard/change_password';
 $route['logout'] = 'auth/logout_post';
 $route['create'] = 'dashboard/store';
 $route['getTickets'] = 'dashboard/getTickets';

@@ -12,32 +12,34 @@ class Auth extends RestController {
         parent::__construct();
         $this->load->library('session');
         $this->load->model('User_model'); // Load User Model
+        $this->load->library('form_validation');
+
     }
 
     public function login_post() {
-        $username = $this->input->post('username');
+        $email = $this->input->post('email');
         $password = $this->input->post('password');
 
-        if (!$username || !$password) {
+        if (!$email || !$password) {
             $this->response([
                 'status' => false,
-                'message' => 'Username and password are required'
+                'message' => 'Email and password are required'
             ], RestController::HTTP_BAD_REQUEST);
             return;
         }
 
-        $user = $this->User_model->check_login($username, $password);
+        $user = $this->User_model->check_login($email, $password);
 
         if ($user) {
             // get user details
-            $user_details = $this->User_model->get_userdetails($username);
+            $user_details = $this->User_model->get_userdetails($email);
             
             // generate token
             $jwt = new JWT();
             $SecretKey = 'leo_key';
             $data = array(
-                'user_id' => $user_details->id,
-                'username' => $user_details->username
+                'user_id' => $user_details->user_id,
+                'email' => $user_details->email 
             );
  
             $token = $jwt->encode($data, $SecretKey, 'HS256');
@@ -52,9 +54,31 @@ class Auth extends RestController {
         } else {
             $this->response([
                 'status' => false,
-                'message' => 'Invalid username or password'
+                'message' => 'Invalid email or password'
             ], RestController::HTTP_UNAUTHORIZED);
         }
     }
+
+    public function register_user_post() {
+
+        $this->form_validation->set_rules('username', 'Username', 'required|is_unique[users.username]');
+        $this->form_validation->set_rules('password', 'Password', 'required|min_length[5]');
+        $this->form_validation->set_rules('email', 'Email', 'required|valid_email|is_unique[users.email]');
+        $this->form_validation->set_rules('phone_number', 'Phone Number', 'required');
+
+        if ($this->form_validation->run() === FALSE) {
+            echo json_encode(['status' => false, 'message' => validation_errors()]);
+        } else {
+            $data = [
+                'username' => $this->input->post('username'),
+                'password' => password_hash($this->input->post('password'), PASSWORD_DEFAULT),
+                'email' => $this->input->post('email'),
+                'phone_number' => $this->input->post('phone_number'),
+            ];
+            $this->User_model->insert_user($data);
+            echo json_encode(['status' => true, 'message' => 'User registered successfully']);
+        }
+    }
 }
+
 ?>

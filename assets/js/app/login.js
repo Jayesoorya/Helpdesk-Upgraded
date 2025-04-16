@@ -2,28 +2,28 @@ new Vue({
     el: "#app",
     data() {
         return {
-            username: '',
+            email: '',
             password: '',
             errorMessage: ''
         };
     },
     methods: {
         login() {
-            if (!this.username || !this.password) {
-                this.errorMessage = "Username and password are required!";
+            if (!this.email || !this.password) {
+                this.errorMessage = "Email and password are required!";
                 return;
             }
 
-            axios.post("http://localhost/Helpdesk_vue.js/login", 
+            axios.post("http://localhost/Helpdesk-Upgraded/login", 
             {
-                username: this.username,
+                email: this.email,
                 password: this.password
             }, 
             {
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
                     "X-Requested-With": "XMLHttpRequest",
-                    "X-API-KEY": "api123"
+                    //"X-API-KEY": "api123"
                 }
             })
             .then(response => {

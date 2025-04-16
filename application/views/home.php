@@ -5,9 +5,12 @@
             <button class="btn btn-info">
                 <a class="text-white text-decoration-none" @click="logout">Logout</a>
             </button>
+            <button class="btn btn-outline-primary" @click="goToProfile">
+                <i class="fas fa-user-circle"></i> Profile
+            </button>
         </div>
 
-        <h1>Helpdesk 2.0</h1>
+        <h1>Helpdesk Upgraded</h1>
         <h2 class="mt-4">Welcome,</h2>
 
         <!-- Ticket Table -->
@@ -26,9 +29,9 @@
                 <tbody>
                     <tr v-for="(ticket, index) in tickets" :key="ticket.id">
                         <td>{{ index + 1 }}</td>
-                        <td>{{ ticket.Ticket }}</td>
-                        <td><a class="btn btn-info" :href="'http://localhost/Helpdesk_vue.js/details/' + ticket.id">Details</a></td>
-                        <td>{{ ticket.Status }}</td>
+                        <td>{{ ticket.ticket }}</td>
+                        <td><a class="btn btn-info" :href="'http://localhost/Helpdesk-Upgraded/details/' + ticket.id">Details</a></td>
+                        <td>{{ ticket.status }}</td>
                         <td><button class="btn btn-success" @click="openUpdateModal(ticket)">Update</button></td>
                         <td><button class="btn btn-danger" @click="deleteTicket(ticket.id)">Delete</button></td>
                     </tr>
@@ -88,15 +91,15 @@
                         <form @submit.prevent="updateTicket">
                             <div class="form-group">
                                 <label for="updateTicket">Ticket:</label>
-                                <input class="form-control" v-model="updateTicketData.Ticket" required>
+                                <input class="form-control" v-model="updateTicketData.ticket" required>
                             </div>
                             <div class="form-group">
                                 <label for="updateDescription">Description:</label>
-                                <input class="form-control" v-model="updateTicketData.Description">
+                                <input class="form-control" v-model="updateTicketData.description">
                             </div>
                             <div class="form-group">
                                 <label for="updateStatus">Status:</label>
-                                <select class="form-control" v-model="updateTicketData.Status">
+                                <select class="form-control" v-model="updateTicketData.status">
                                     <option value="Open">Open</option>
                                     <option value="In Progress">In Progress</option>
                                     <option value="Closed">Closed</option>
