@@ -215,10 +215,10 @@ class Dashboard extends RestController {
              $decoded =  $jwt->decode($token, $SecretKey, 'HS256');
  
              $user_id = $decoded->user_id;
-             $username = $decoded->username;
+             $email = $decoded->email;
  
              // validate the jwt token
-             $user = $this->User_model->check_id_username($user_id, $username);
+             $user = $this->User_model->check_id_email($user_id, $email);
 
             if ($user) {
                 if ($this->Ticket_model->delete($id)) {
@@ -244,8 +244,14 @@ class Dashboard extends RestController {
     }
 
     //  get profile
-    public function get_profile_post() {
+    public function get_profile_get() {
         $token = $this->input->get_request_header('Authorization');
+
+        if (!$token) {
+            $this->response(['status' => false, 'message' => 'Authorization header missing'], RestController::HTTP_UNAUTHORIZED);
+            return;
+        }
+    
         $token = str_replace('Bearer ', '', $token);
     
         try {

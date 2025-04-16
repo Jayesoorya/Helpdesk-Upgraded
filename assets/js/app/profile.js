@@ -13,7 +13,7 @@ new Vue({
     methods: {
         loadProfile() {
             const token = localStorage.getItem("token");
-            axios.post("http://localhost/Helpdesk-Upgraded/get_profile", {}, {
+            axios.get("http://localhost/Helpdesk-Upgraded/get_profile", {
 
                 headers: { "Authorization": `Bearer ${token}`,
                         "Content-Type": "application/x-www-form-urlencoded" }
